@@ -1,8 +1,10 @@
-module comparator(A, B, sel, C);
+module comparator(A, B, sel, OUT);
   input[15:0] A, B;
   input [2:0] sel;
-  output reg[15:0] C;
-  always @(A, B, sel) begin
+  output[15:0] OUT;
+  reg[15:0] C;
+  assign OUT = C;
+  always @(A or B or sel) begin
     case(sel)
       3'b000: 
         begin
