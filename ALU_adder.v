@@ -1,8 +1,10 @@
 module adder_block(A, B, SEL, SUM, COUT, OVRFLOW);
   input[15:0] A, B;
   input[2:0] SEL;
-  output reg[15:0] C;
-  output OVRFLOW, COUT;
+  output reg[15:0] SUM;
+  output reg OVRFLOW, COUT;
+  reg[15:0] a_in, b_in;
+  reg cin;
   CLA_16b_Block adder(a_in, b_in, cin, sum, cout);
   always @(A or B or SEL)
     begin
@@ -13,9 +15,9 @@ module adder_block(A, B, SEL, SUM, COUT, OVRFLOW);
             b_in <= B;
             a_in <= A;
             cin <= 0;
-            #5 C<= sum;
+            #5 SUM<= sum;
             COUT <= 0;
-            if(~(A[15] ^ B[15]) and B[15] ~= cout)
+            if(~(A[15] ^ B[15]) & B[15] != cout)
               OVRFLOW = 1'b1;
             else
               OVRFLOW = 1'b0;
@@ -25,7 +27,7 @@ module adder_block(A, B, SEL, SUM, COUT, OVRFLOW);
             b_in <= B;
             a_in <= A;
             cin <= 1'b0;
-            #5 C <= sum;
+            #5 SUM <= sum;
             COUT <= cout;
             OVRFLOW <= 0;
           end
@@ -34,9 +36,9 @@ module adder_block(A, B, SEL, SUM, COUT, OVRFLOW);
             b_in <= ~B;
             a_in <= A;
             cin <= 1'b1;
-            #5 C<= sum;
+            #5 SUM<= sum;
             COUT <= 0;
-            if(~(A[15] ^ b_in[15]) and b_in[15] ~= cout)
+            if(~(A[15] ^ b_in[15]) & b_in[15] != cout)
               OVRFLOW = 1'b1;
             else
               OVRFLOW = 1'b0;
@@ -46,7 +48,7 @@ module adder_block(A, B, SEL, SUM, COUT, OVRFLOW);
             b_in <= ~B;
             a_in <= A;
             cin <= 1'b1;
-            #5 C <= sum;
+            #5 SUM <= sum;
             COUT <= cout;
             OVRFLOW <= 0;
           end
@@ -55,9 +57,9 @@ module adder_block(A, B, SEL, SUM, COUT, OVRFLOW);
             a_in <= A;
             b_in <= 0;
             cin <= 1'b1;
-            #5 C <= sum;
+            #5 SUM <= sum;
             COUT <= 0;
-            if(~(A[15] ^ B[15]) and B[15] ~= cout)
+            if(~(A[15] ^ B[15]) & B[15] != cout)
               OVRFLOW = 1'b1;
             else
               OVRFLOW = 1'b0;
@@ -67,9 +69,9 @@ module adder_block(A, B, SEL, SUM, COUT, OVRFLOW);
             a_in <= A;
             b_in <= -1;
             cin <= 1'b0;
-            #5 C <= sum;
+            #5 SUM <= sum;
             COUT <= 0;
-            if(~(A[15] ^ B[15]) and B[15] ~= cout)
+            if(~(A[15] ^ B[15]) & B[15] != cout)
               OVRFLOW = 1'b1;
             else
               OVRFLOW = 1'b0;
