@@ -1,80 +1,69 @@
 module adder_block(A, B, SEL, SUM, COUT, OVRFLOW);
   input[15:0] A, B;
   input[2:0] SEL;
-  output reg[15:0] SUM;
-  output reg OVRFLOW, COUT;
-  reg[15:0] a_in, b_in;
-  reg cin;
-  CLA_16b_Block adder(a_in, b_in, cin, sum, cout);
+  output [15:0] SUM;
+  output OVRFLOW, COUT;
+  reg[15:0] a_in, b_in, sum;
+  reg cin, ovr, co;
+  assign {OVRFLOW, COUT} = {ovr, co};
+  assign SUM = sum;
+  wire[15:0] sum_w;
+  CLA_16b_Block adder(a_in, b_in, cin, sum_w, cout);
   always @(A or B or SEL)
     begin
-      if(SEL == 3'b001)
       case(SEL)
         3'b000: //signed addition
           begin
-            b_in <= B;
-            a_in <= A;
-            cin <= 0;
-            #5 SUM<= sum;
-            COUT <= 0;
-            if(~(A[15] ^ B[15]) & B[15] != cout)
-              OVRFLOW = 1'b1;
-            else
-              OVRFLOW = 1'b0;
+	    a_in <= A;
+	    b_in <= B;
+	    cin <= 0;
+	    #10 sum <= sum_w;
+	    ovr <= (A[15]==B[15] & (sum_w[15] != A[15])); 
+	    co <= 0;
           end
         3'b001: //unsigned addition
           begin
-            b_in <= B;
-            a_in <= A;
-            cin <= 1'b0;
-            #5 SUM <= sum;
-            COUT <= cout;
-            OVRFLOW <= 0;
+	    a_in <= A;
+	    b_in <= B;
+	    cin <= 0;
+	    #10 co <= cout;
+	    sum <= sum_w;
+	    ovr <= 0; 
           end
         3'b010: //signed subtraction
           begin
-            b_in <= ~B;
-            a_in <= A;
-            cin <= 1'b1;
-            #5 SUM<= sum;
-            COUT <= 0;
-            if(~(A[15] ^ b_in[15]) & b_in[15] != cout)
-              OVRFLOW = 1'b1;
-            else
-              OVRFLOW = 1'b0;
+	    a_in <= A;
+	    b_in <= ~B;
+	    cin <= 1;
+	    #10 sum <= sum_w;
+	    ovr <= (A[15]==B[15] & (sum_w[15] != A[15]));
+            co <= 0;
           end
         3'b011: //unsigned subtraction
           begin
-            b_in <= ~B;
-            a_in <= A;
-            cin <= 1'b1;
-            #5 SUM <= sum;
-            COUT <= cout;
-            OVRFLOW <= 0;
+	    a_in <= A;
+	    b_in <= ~B;
+	    cin <= 1;
+	    #10 co <= cout;
+	    sum <= sum_w;
+	    ovr <= 0;
           end
-        3'b100: //signed inscrement
+        3'b100: //signed increment
           begin
-            a_in <= A;
-            b_in <= 0;
-            cin <= 1'b1;
-            #5 SUM <= sum;
-            COUT <= 0;
-            if(~(A[15] ^ B[15]) & B[15] != cout)
-              OVRFLOW = 1'b1;
-            else
-              OVRFLOW = 1'b0;
+	    a_in <= A;
+	    cin <= 1;
+	    #10 sum <= sum_w;
+	    ovr <= ((sum_w[15] == 1'b1));
+            co <= 0;
           end
         3'b101: //signed decrement
           begin
-            a_in <= A;
-            b_in <= -1;
-            cin <= 1'b0;
-            #5 SUM <= sum;
-            COUT <= 0;
-            if(~(A[15] ^ B[15]) & B[15] != cout)
-              OVRFLOW = 1'b1;
-            else
-              OVRFLOW = 1'b0;
+	    a_in <= A;
+	    b_in <= -1;
+	    cin <= 0;
+	    #10 sum <= sum_w;
+	    ovr <= ((sum_w[15] == 1'b0));
+            co <= 0;
           end
       endcase
     end
